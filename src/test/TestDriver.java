@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package hoten.voronoi.test;
+package test;
 
 import hoten.geom.Point;
 import hoten.geom.Rectangle;
