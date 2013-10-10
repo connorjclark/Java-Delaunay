@@ -28,13 +28,8 @@ public class TestDriver {
         final Random r = new Random(seed);
         System.out.println("seed: " + seed);
 
-        //let's create a bunch of random points
-        for (int i = 0; i < numSites; i++) {
-            points.add(new Point(r.nextDouble() * width, r.nextDouble() * height));
-        }
-
-        //now make the intial underlying voronoi structure
-        final Voronoi v = new Voronoi(points, null);
+        //make the intial underlying voronoi structure
+        final Voronoi v = new Voronoi(numSites, width, height, r, null);
 
         //assemble the voronoi strucutre into a usable graph object representing a map
         final VoronoiGraph graph = new VoronoiGraph(v, 2, r);

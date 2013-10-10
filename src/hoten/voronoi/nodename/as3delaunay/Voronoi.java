@@ -32,6 +32,7 @@ import hoten.geom.Rectangle;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public final class Voronoi {
 
@@ -85,6 +86,15 @@ public final class Voronoi {
             maxHeight = Math.max(maxHeight, p.y);
         }
         System.out.println(maxWidth + "," + maxHeight);
+        init(points, colors, new Rectangle(0, 0, maxWidth, maxHeight));
+        fortunesAlgorithm();
+    }
+
+    public Voronoi(int numSites, double maxWidth, double maxHeight, Random r, ArrayList<Color> colors) {
+        ArrayList<Point> points = new ArrayList();
+        for (int i = 0; i < numSites; i++) {
+            points.add(new Point(r.nextDouble() * maxWidth, r.nextDouble() * maxHeight));
+        }
         init(points, colors, new Rectangle(0, 0, maxWidth, maxHeight));
         fortunesAlgorithm();
     }
