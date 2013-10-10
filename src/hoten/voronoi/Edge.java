@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hoten.voronoi;
 
 import hoten.geom.Point;
 
 /**
- * Edge.java Function Date Jun 5, 2013
+ * Edge.java
  *
  * @author Connor
  */
@@ -17,7 +13,6 @@ public class Edge {
     public Center d0, d1;  // Delaunay edge
     public Corner v0, v1;  // Voronoi edge
     public Point midpoint;  // halfway between v0,v1
-    
     public int river;
 
     public void setVornoi(Corner v0, Corner v1) {

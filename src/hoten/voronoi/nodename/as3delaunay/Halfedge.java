@@ -38,6 +38,7 @@ public final class Halfedge {
         return this;
     }
 
+    @Override
     public String toString() {
         return "Halfedge (leftRight: " + leftRight + "; vertex: " + vertex + ")";
     }

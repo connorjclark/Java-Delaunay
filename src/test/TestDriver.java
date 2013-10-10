@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package test;
 
 import hoten.geom.Point;
@@ -18,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 /**
- * TestDriver.java Function Date Jun 14, 2013
+ * TestDriver.java
  *
  * @author Connor
  */

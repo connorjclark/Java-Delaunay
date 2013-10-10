@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hoten.geom;
 
 /**
- * GenUtil.java Function Date Jun 17, 2013
+ * GenUtil.java
  *
  * @author Connor
  */

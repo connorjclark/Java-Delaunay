@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hoten.voronoi;
 
 import hoten.geom.Point;
@@ -20,7 +16,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 /**
- * VoronoiGraph.java Function Date Jun 14, 2013
+ * VoronoiGraph.java
  *
  * @author Connor
  */
@@ -221,7 +217,7 @@ public class VoronoiGraph {
                 } else if (c.coast) {
                     g.setColor(new Color(BEACH));
                 } else {
-                    Color color = null;
+                    Color color;
                     switch (c.biome) {
                         case TUNDRA:
                             color = new Color(TUNDRA);

@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hoten.voronoi;
 
 /**
- * Biomes.java Function Date Jul 31, 2013
+ * Biomes.java
  *
  * @author Connor
  */

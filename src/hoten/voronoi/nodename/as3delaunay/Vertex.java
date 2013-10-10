@@ -23,6 +23,7 @@ final class Vertex extends Object implements ICoord {
     private static int _nvertices = 0;
     private Point _coord;
 
+    @Override
     public Point get_coord() {
         return _coord;
     }
@@ -50,6 +51,7 @@ final class Vertex extends Object implements ICoord {
         _vertexIndex = _nvertices++;
     }
 
+    @Override
     public String toString() {
         return "Vertex (" + _vertexIndex + ")";
     }

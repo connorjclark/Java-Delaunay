@@ -1,17 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hoten.geom;
 
 /**
- * Point.java Function Date Jun 13, 2013
+ * Point.java
  *
  * @author Connor
  */
 public class Point {
 
-   public static double distance(Point _coord, Point _coord0) {
+    public static double distance(Point _coord, Point _coord0) {
         return Math.sqrt((_coord.x - _coord0.x) * (_coord.x - _coord0.x) + (_coord.y - _coord0.y) * (_coord.y - _coord0.y));
     }
     public double x, y;
@@ -20,9 +16,9 @@ public class Point {
         this.x = x;
         this.y = y;
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return x + ", " + y;
     }
 

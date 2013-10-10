@@ -12,6 +12,7 @@ public final class Winding {
         _name = name;
     }
 
+    @Override
     public String toString() {
         return _name;
     }

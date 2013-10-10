@@ -15,6 +15,7 @@ public final class SiteList implements IDisposable {
         _sorted = false;
     }
 
+    @Override
     public void dispose() {
         if (_sites != null) {
             for (Site site : _sites) {

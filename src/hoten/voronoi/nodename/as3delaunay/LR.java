@@ -14,6 +14,7 @@ public final class LR {
         return leftRight == LEFT ? RIGHT : LEFT;
     }
 
+    @Override
     public String toString() {
         return _name;
     }

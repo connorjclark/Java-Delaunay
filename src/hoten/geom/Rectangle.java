@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hoten.geom;
 
 /**
- * Rectangle.java Function Date Jun 13, 2013
+ * Rectangle.java
  *
  * @author Connor
  */

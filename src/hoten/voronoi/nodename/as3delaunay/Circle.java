@@ -13,6 +13,7 @@ public final class Circle extends Object {
         this.radius = radius;
     }
 
+    @Override
     public String toString() {
         return "Circle (center: " + center + "; radius: " + radius + ")";
     }

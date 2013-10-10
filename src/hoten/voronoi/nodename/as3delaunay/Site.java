@@ -164,7 +164,7 @@ public final class Site implements ICoord {
     }
 
     ArrayList<Point> region(Rectangle clippingBounds) {
-        if (_edges == null || _edges.size() == 0) {
+        if (_edges == null || _edges.isEmpty()) {
             return new ArrayList();
         }
         if (_edgeOrientations == null) {
