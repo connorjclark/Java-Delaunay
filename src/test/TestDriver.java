@@ -1,7 +1,6 @@
 package test;
 
 import hoten.geom.Point;
-import hoten.geom.Rectangle;
 import hoten.voronoi.VoronoiGraph;
 import hoten.voronoi.nodename.as3delaunay.Voronoi;
 import java.awt.Color;
@@ -35,7 +34,7 @@ public class TestDriver {
         }
 
         //now make the intial underlying voronoi structure
-        final Voronoi v = new Voronoi(points, null, new Rectangle(0, 0, width, height));
+        final Voronoi v = new Voronoi(points, null);
 
         //assemble the voronoi strucutre into a usable graph object representing a map
         final VoronoiGraph graph = new VoronoiGraph(v, 2, r);

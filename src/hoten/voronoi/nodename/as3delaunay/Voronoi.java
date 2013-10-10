@@ -74,13 +74,28 @@ public final class Voronoi {
     }
 
     public Voronoi(ArrayList<Point> points, ArrayList<Color> colors, Rectangle plotBounds) {
+        init(points, colors, plotBounds);
+        fortunesAlgorithm();
+    }
+
+    public Voronoi(ArrayList<Point> points, ArrayList<Color> colors) {
+        double maxWidth = 0, maxHeight = 0;
+        for (Point p : points) {
+            maxWidth = Math.max(maxWidth, p.x);
+            maxHeight = Math.max(maxHeight, p.y);
+        }
+        System.out.println(maxWidth + "," + maxHeight);
+        init(points, colors, new Rectangle(0, 0, maxWidth, maxHeight));
+        fortunesAlgorithm();
+    }
+
+    private void init(ArrayList<Point> points, ArrayList<Color> colors, Rectangle plotBounds) {
         _sites = new SiteList();
         _sitesIndexedByLocation = new HashMap();
         addSites(points, colors);
         _plotBounds = plotBounds;
         _triangles = new ArrayList();
         _edges = new ArrayList();
-        fortunesAlgorithm();
     }
 
     private void addSites(ArrayList<Point> points, ArrayList<Color> colors) {
