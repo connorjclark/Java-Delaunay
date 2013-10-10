@@ -67,6 +67,7 @@ public final class Site implements ICoord {
     }
     private Point _coord;
 
+    @Override
     public Point get_coord() {
         return _coord;
     }
@@ -94,6 +95,7 @@ public final class Site implements ICoord {
         return this;
     }
 
+    @Override
     public String toString() {
         return "Site " + _siteIndex + ": " + get_coord();
     }
@@ -140,7 +142,7 @@ public final class Site implements ICoord {
     }
 
     ArrayList<Site> neighborSites() {
-        if (_edges == null || _edges.size() == 0) {
+        if (_edges == null || _edges.isEmpty()) {
             return new ArrayList();
         }
         if (_edgeOrientations == null) {
