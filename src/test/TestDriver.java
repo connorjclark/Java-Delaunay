@@ -6,7 +6,6 @@ package test;
 
 import hoten.geom.Point;
 import hoten.geom.Rectangle;
-import hoten.utils.MyRandom;
 import hoten.voronoi.VoronoiGraph;
 import hoten.voronoi.nodename.as3delaunay.Voronoi;
 import java.awt.Color;
@@ -14,6 +13,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -30,17 +30,17 @@ public class TestDriver {
         final int numSites = 3000;
         final ArrayList<Point> points = new ArrayList();
         final long seed = System.nanoTime();
-        final MyRandom r = new MyRandom(seed);
+        final Random r = new Random(seed);
         System.out.println("seed: " + seed);
 
         //let's create a bunch of random points
         for (int i = 0; i < numSites; i++) {
-            points.add(new Point(r.nextDouble(0, width), r.nextDouble(0, height)));
+            points.add(new Point(r.nextDouble() * width, r.nextDouble() * height));
         }
-        
+
         //now make the intial underlying voronoi structure
         final Voronoi v = new Voronoi(points, null, new Rectangle(0, 0, width, height));
-        
+
         //assemble the voronoi strucutre into a usable graph object representing a map
         final VoronoiGraph graph = new VoronoiGraph(v, 2, r);
 

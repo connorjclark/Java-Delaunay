@@ -6,7 +6,6 @@ package hoten.voronoi;
 
 import hoten.geom.Point;
 import hoten.geom.Rectangle;
-import hoten.utils.MyRandom;
 import hoten.voronoi.nodename.as3delaunay.LineSegment;
 import hoten.voronoi.nodename.as3delaunay.Voronoi;
 import java.awt.BasicStroke;
@@ -31,14 +30,14 @@ public class VoronoiGraph {
     final public ArrayList<Corner> corners = new ArrayList();
     final public ArrayList<Center> centers = new ArrayList();
     final public Rectangle bounds;
-    final private MyRandom r;
+    final private Random r;
 
-    public VoronoiGraph(Voronoi v, int numLloydRelaxations, MyRandom r) {
+    public VoronoiGraph(Voronoi v, int numLloydRelaxations, Random r) {
         this.r = r;
-        bumps = r.nextInt(1, 6);
-        startAngle = r.nextDouble(0, 2 * Math.PI);
-        dipAngle = r.nextDouble(0, 2 * Math.PI);
-        dipWidth = r.nextDouble(0.2, 0.7);
+        bumps = r.nextInt(5) + 1;
+        startAngle = r.nextDouble() * 2 * Math.PI;
+        dipAngle = r.nextDouble() * 2 * Math.PI;
+        dipWidth = r.nextDouble() * .5 + .2;
         bounds = v.get_plotBounds();
         for (int i = 0; i < numLloydRelaxations; i++) {
             ArrayList<Point> points = v.siteCoords();
@@ -508,10 +507,9 @@ public class VoronoiGraph {
     final double startAngle;
     final double dipAngle;
     final double dipWidth;
-    
+
     //only the radial implementation of amitp's map generation
     //TODO implement more island shapes
-
     private boolean isWater(Point p) {
         p = new Point(2 * (p.x / bounds.width - 0.5), 2 * (p.y / bounds.height - 0.5));
 
@@ -654,7 +652,7 @@ public class VoronoiGraph {
 
     private void createRivers() {
         for (int i = 0; i < bounds.width / 2; i++) {
-            Corner c = corners.get(r.nextInt(0, corners.size()));
+            Corner c = corners.get(r.nextInt(corners.size()));
             if (c.ocean || c.elevation < 0.3 || c.elevation > 0.9) {
                 continue;
             }
