@@ -20,13 +20,15 @@ import java.util.Random;
  *
  * @author Connor
  */
-public class VoronoiGraph {
+public abstract class VoronoiGraph {
 
     final public ArrayList<Edge> edges = new ArrayList();
     final public ArrayList<Corner> corners = new ArrayList();
     final public ArrayList<Center> centers = new ArrayList();
     final public Rectangle bounds;
     final private Random r;
+    public BufferedImage img;
+    protected Color OCEAN, RIVER, LAKE, BEACH;
 
     public VoronoiGraph(Voronoi v, int numLloydRelaxations, Random r) {
         this.r = r;
@@ -69,7 +71,10 @@ public class VoronoiGraph {
         assignBiomes();
         calculateAreas();
     }
-    public BufferedImage img;
+
+    abstract protected Enum getBiome(Center p);
+
+    abstract protected Color getColor(Enum biome);
 
     public Center getCenterOf(int x, int y) {
         return centers.get(img.getRGB(x, y) & 0xffffff);
@@ -194,140 +199,83 @@ public class VoronoiGraph {
     }
 
     public void paint(Graphics2D g) {
-        paint(g, true, false, false, false, false);
+        paint(g, true, true, false, false, false, true);
     }
 
-    public void paint(Graphics2D g, boolean drawBg, boolean drawSites, boolean drawCorners, boolean drawDelaunay, boolean drawVoronoi) {
+    public void paint(Graphics2D g, boolean drawBiomes, boolean drawRivers, boolean drawSites, boolean drawCorners, boolean drawDelaunay, boolean drawVoronoi) {
         final int numSites = centers.size();
 
-        Color[] key = new Color[numSites];
-        for (int i = 0; i < key.length; i++) {
-            Random r = new Random(i);
-            key[i] = new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255));
-        }
-
-        //draw via triangles
-        if (drawBg) {
-            for (Center c : centers) {
-                g.setColor(key[c.index]);
-                if (c.ocean) {
-                    g.setColor(new Color(OCEAN));
-                } else if (c.water) {
-                    g.setColor(new Color(LAKE));
-                } else if (c.coast) {
-                    g.setColor(new Color(BEACH));
-                } else {
-                    Color color;
-                    switch (c.biome) {
-                        case TUNDRA:
-                            color = new Color(TUNDRA);
-                            break;
-                        case TROPICAL_SEASONAL_FOREST:
-                            color = new Color(TROPICAL_SEASONAL_FOREST);
-                            break;
-                        case TROPICAL_RAIN_FOREST:
-                            color = new Color(TROPICAL_RAIN_FOREST);
-                            break;
-                        case SUBTROPICAL_DESERT:
-                            color = new Color(SUBTROPICAL_DESERT);
-                            break;
-                        case SNOW:
-                            color = new Color(SNOW);
-                            break;
-                        case SCORCHED:
-                            color = new Color(SCORCHED);
-                            break;
-                        case LAKESHORE:
-                            color = new Color(LAKESHORE);
-                            break;
-                        case ICE:
-                            color = new Color(ICE);
-                            break;
-                        case BEACH:
-                            color = new Color(BEACH);
-                            break;
-                        case COAST:
-                            color = new Color(COAST);
-                            break;
-                        case BARE:
-                            color = new Color(BARE);
-                            break;
-                        case SHRUBLAND:
-                            color = new Color(SHRUBLAND);
-                            break;
-                        case TAIGA:
-                            color = new Color(TAIGA);
-                            break;
-                        case MARSH:
-                            color = new Color(MARSH);
-                            break;
-                        default:
-                            color = new Color(GRASSLAND);
-                    }
-                    g.setColor(color);
-                }
-
-                //only used if Center c is on the edge of the graph. allows for completely filling in the outer polygons
-                Corner edgeCorner1 = null;
-                Corner edgeCorner2 = null;
-                for (Center n : c.neighbors) {
-                    Edge e = edgeWithCenters(c, n);
-
-                    if (e.v0 == null) {
-                        //outermost voronoi edges aren't stored in the graph
-                        continue;
-                    }
-
-                    //find a corner on the exterior of the graph
-                    //if this Edge e has one, then it must have two,
-                    //finding these two corners will give us the missing
-                    //triangle to render. this special triangle is handled
-                    //outside this for loop
-                    Corner cornerWithOneAdjacent = e.v0.border ? e.v0 : e.v1;
-                    if (cornerWithOneAdjacent.border) {
-                        if (edgeCorner1 == null) {
-                            edgeCorner1 = cornerWithOneAdjacent;
-                        } else {
-                            edgeCorner2 = cornerWithOneAdjacent;
-                        }
-                    }
-
-                    drawTriangle(g, e.v0, e.v1, c);
-                }
-
-                //handle the missing triangle
-                if (edgeCorner2 != null) {
-                    //if these two outer corners are NOT on the same exterior edge of the graph,
-                    //then we actually must render a polygon (w/ 4 points) and take into consideration
-                    //one of the four corners (either 0,0 or 0,height or width,0 or width,height)
-                    //note: the 'missing polygon' may have more than just 4 points. this
-                    //is common when the number of sites are quite low (less than 5), but not a problem
-                    //with a more useful number of sites. 
-                    //TODO: find a way to fix this
-
-                    if (closeEnough(edgeCorner1.loc.x, edgeCorner2.loc.x, 1)) {
-                        drawTriangle(g, edgeCorner1, edgeCorner2, c);
-                    } else {
-                        int[] x = new int[4];
-                        int[] y = new int[4];
-                        x[0] = (int) c.loc.x;
-                        y[0] = (int) c.loc.y;
-                        x[1] = (int) edgeCorner1.loc.x;
-                        y[1] = (int) edgeCorner1.loc.y;
-
-                        //determine which corner this is
-                        x[2] = (int) ((closeEnough(edgeCorner1.loc.x, bounds.x, 1) || closeEnough(edgeCorner2.loc.x, bounds.x, .5)) ? bounds.x : bounds.right);
-                        y[2] = (int) ((closeEnough(edgeCorner1.loc.y, bounds.y, 1) || closeEnough(edgeCorner2.loc.y, bounds.y, .5)) ? bounds.y : bounds.bottom);
-
-                        x[3] = (int) edgeCorner2.loc.x;
-                        y[3] = (int) edgeCorner2.loc.y;
-
-                        g.fillPolygon(x, y, 4);
-                    }
-                }
+        Color[] defaultColors = null;
+        if (!drawBiomes) {
+            defaultColors = new Color[numSites];
+            for (int i = 0; i < defaultColors.length; i++) {
+                defaultColors[i] = new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255));
             }
         }
 
+        //draw via triangles
+        for (Center c : centers) {
+            g.setColor(drawBiomes ? getColor(c.biome) : defaultColors[c.index]);
+
+            //only used if Center c is on the edge of the graph. allows for completely filling in the outer polygons
+            Corner edgeCorner1 = null;
+            Corner edgeCorner2 = null;
+            for (Center n : c.neighbors) {
+                Edge e = edgeWithCenters(c, n);
+
+                if (e.v0 == null) {
+                    //outermost voronoi edges aren't stored in the graph
+                    continue;
+                }
+
+                //find a corner on the exterior of the graph
+                //if this Edge e has one, then it must have two,
+                //finding these two corners will give us the missing
+                //triangle to render. this special triangle is handled
+                //outside this for loop
+                Corner cornerWithOneAdjacent = e.v0.border ? e.v0 : e.v1;
+                if (cornerWithOneAdjacent.border) {
+                    if (edgeCorner1 == null) {
+                        edgeCorner1 = cornerWithOneAdjacent;
+                    } else {
+                        edgeCorner2 = cornerWithOneAdjacent;
+                    }
+                }
+
+                drawTriangle(g, e.v0, e.v1, c);
+            }
+
+            //handle the missing triangle
+            if (edgeCorner2 != null) {
+                //if these two outer corners are NOT on the same exterior edge of the graph,
+                //then we actually must render a polygon (w/ 4 points) and take into consideration
+                //one of the four corners (either 0,0 or 0,height or width,0 or width,height)
+                //note: the 'missing polygon' may have more than just 4 points. this
+                //is common when the number of sites are quite low (less than 5), but not a problem
+                //with a more useful number of sites. 
+                //TODO: find a way to fix this
+
+                if (closeEnough(edgeCorner1.loc.x, edgeCorner2.loc.x, 1)) {
+                    drawTriangle(g, edgeCorner1, edgeCorner2, c);
+                } else {
+                    int[] x = new int[4];
+                    int[] y = new int[4];
+                    x[0] = (int) c.loc.x;
+                    y[0] = (int) c.loc.y;
+                    x[1] = (int) edgeCorner1.loc.x;
+                    y[1] = (int) edgeCorner1.loc.y;
+
+                    //determine which corner this is
+                    x[2] = (int) ((closeEnough(edgeCorner1.loc.x, bounds.x, 1) || closeEnough(edgeCorner2.loc.x, bounds.x, .5)) ? bounds.x : bounds.right);
+                    y[2] = (int) ((closeEnough(edgeCorner1.loc.y, bounds.y, 1) || closeEnough(edgeCorner2.loc.y, bounds.y, .5)) ? bounds.y : bounds.bottom);
+
+                    x[3] = (int) edgeCorner2.loc.x;
+                    y[3] = (int) edgeCorner2.loc.y;
+
+                    g.fillPolygon(x, y, 4);
+                }
+            }
+        }
 
         for (Edge e : edges) {
             if (drawDelaunay) {
@@ -335,9 +283,9 @@ public class VoronoiGraph {
                 g.setColor(Color.YELLOW);
                 g.drawLine((int) e.d0.loc.x, (int) e.d0.loc.y, (int) e.d1.loc.x, (int) e.d1.loc.y);
             }
-            if (e.river > 0) {
+            if (drawRivers && e.river > 0) {
                 g.setStroke(new BasicStroke(1 + (int) Math.sqrt(e.river * 2)));
-                g.setColor(new Color(RIVER));
+                g.setColor(RIVER);
                 g.drawLine((int) e.v0.loc.x, (int) e.v0.loc.y, (int) e.v1.loc.x, (int) e.v1.loc.y);
             }
         }
@@ -734,124 +682,9 @@ public class VoronoiGraph {
         }
     }
 
-    private Biomes getBiome(Center p) {
-        if (p.ocean) {
-            return Biomes.OCEAN;
-        } else if (p.water) {
-            if (p.elevation < 0.1) {
-                return Biomes.MARSH;
-            }
-            if (p.elevation > 0.8) {
-                return Biomes.ICE;
-            }
-            return Biomes.LAKE;
-        } else if (p.coast) {
-            return Biomes.BEACH;
-        } else if (p.elevation > 0.8) {
-            if (p.moisture > 0.50) {
-                return Biomes.SNOW;
-            } else if (p.moisture > 0.33) {
-                return Biomes.TUNDRA;
-            } else if (p.moisture > 0.16) {
-                return Biomes.BARE;
-            } else {
-                return Biomes.SCORCHED;
-            }
-        } else if (p.elevation > 0.6) {
-            if (p.moisture > 0.66) {
-                return Biomes.TAIGA;
-            } else if (p.moisture > 0.33) {
-                return Biomes.SHRUBLAND;
-            } else {
-                return Biomes.TEMPERATE_DESERT;
-            }
-        } else if (p.elevation > 0.3) {
-            if (p.moisture > 0.83) {
-                return Biomes.TEMPERATE_RAIN_FOREST;
-            } else if (p.moisture > 0.50) {
-                return Biomes.TEMPERATE_DECIDUOUS_FOREST;
-            } else if (p.moisture > 0.16) {
-                return Biomes.GRASSLAND;
-            } else {
-                return Biomes.TEMPERATE_DESERT;
-            }
-        } else {
-            if (p.moisture > 0.66) {
-                return Biomes.TROPICAL_RAIN_FOREST;
-            } else if (p.moisture > 0.33) {
-                return Biomes.TROPICAL_SEASONAL_FOREST;
-            } else if (p.moisture > 0.16) {
-                return Biomes.GRASSLAND;
-            } else {
-                return Biomes.SUBTROPICAL_DESERT;
-            }
-        }
-    }
-
     private void assignBiomes() {
         for (Center center : centers) {
             center.biome = getBiome(center);
         }
-    }
-    //
-    //
-    public int OCEAN = 0x44447a;
-    public int COAST = 0x33335a;
-    public int LAKESHORE = 0x225588;
-    public int LAKE = 0x336699;
-    public int RIVER = 0x225588;
-    public int MARSH = 0x2f6666;
-    public int ICE = 0x99ffff;
-    public int BEACH = 0xa09077;
-    public int ROAD1 = 0x442211;
-    public int ROAD2 = 0x553322;
-    public int ROAD3 = 0x664433;
-    public int vBRIDGE = 0x686860;
-    public int LAVA = 0xcc3333;
-    // Terrain
-    public int SNOW = 0xffffff;
-    public int TUNDRA = 0xbbbbaa;
-    public int BARE = 0x888888;
-    public int SCORCHED = 0x555555;
-    public int TAIGA = 0x99aa77;
-    public int SHRUBLAND = 0x889977;
-    public int TEMPERATE_DESERT = 0xc9d29b;
-    public int TEMPERATE_RAIN_FOREST = 0x448855;
-    public int TEMPERATE_DECIDUOUS_FOREST = 0x679459;
-    public int GRASSLAND = 0x88aa55;
-    public int SUBTROPICAL_DESERT = 0xd2b98b;
-    public int TROPICAL_RAIN_FOREST = 0x337755;
-    public int TROPICAL_SEASONAL_FOREST = 0x559944;
-    public static HashMap<Integer, String> colorBiomeMap = new HashMap();
-    public static HashMap<String, Integer> biomeColorMap = new HashMap();
-
-    static {
-        addColor("OCEAN", 0x44447a);
-        addColor("COAST", 0x33335a);
-        addColor("LAKESHORE", 0x225588);
-        addColor("LAKE", 0x336699);
-        addColor("RIVER", 0x225588);
-        addColor("MARSH", 0x2f6666);
-        addColor("MARSH", 0x2f6666);
-        addColor("ICE", 0x99ffff);
-        addColor("BEACH", 0xa09077);
-        addColor("SNOW", 0xffffff);
-        addColor("TUNDRA", 0xbbbbaa);
-        addColor("BARE", 0x888888);
-        addColor("SCORCHED", 0x555555);
-        addColor("TAIGA", 0x99aa77);
-        addColor("SHRUBLAND", 0x889977);
-        addColor("TEMPERATE_DESERT", 0xc9d29b);
-        addColor("TEMPERATE_RAIN_FOREST", 0x448855);
-        addColor("TEMPERATE_DECIDUOUS_FOREST", 0x679459);
-        addColor("GRASSLAND", 0x88aa55);
-        addColor("SUBTROPICAL_DESERT", 0xd2b98b);
-        addColor("TROPICAL_RAIN_FOREST", 0x337755);
-        addColor("TROPICAL_SEASONAL_FOREST", 0x559944);
-    }
-
-    private static void addColor(String name, int color) {
-        colorBiomeMap.put(color, name);
-        biomeColorMap.put(name, color);
     }
 }

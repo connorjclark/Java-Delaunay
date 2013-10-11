@@ -32,7 +32,7 @@ public class TestDriver {
         final Voronoi v = new Voronoi(numSites, width, height, r, null);
 
         //assemble the voronoi strucutre into a usable graph object representing a map
-        final VoronoiGraph graph = new VoronoiGraph(v, 2, r);
+        final TestGraphImpl graph = new TestGraphImpl(v, 2, r);
 
         final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g = img.createGraphics();
