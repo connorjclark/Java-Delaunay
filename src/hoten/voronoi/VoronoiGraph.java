@@ -69,7 +69,6 @@ public abstract class VoronoiGraph {
         redistributeMoisture(landCorners());
         assignPolygonMoisture();
         assignBiomes();
-        calculateAreas();
     }
 
     abstract protected Enum getBiome(Center p);
@@ -78,74 +77,6 @@ public abstract class VoronoiGraph {
 
     public Center getCenterOf(int x, int y) {
         return centers.get(img.getRGB(x, y) & 0xffffff);
-    }
-
-    private void calculateAreas() {
-        img = new BufferedImage((int) bounds.width, (int) bounds.height, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D g = img.createGraphics();
-        for (Center c : centers) {
-            g.setColor(new Color(c.index));
-
-            //only used if Center c is on the edge of the graph. allows for completely filling in the outer polygons
-            Corner edgeCorner1 = null;
-            Corner edgeCorner2 = null;
-            for (Center n : c.neighbors) {
-                Edge e = edgeWithCenters(c, n);
-
-                if (e.v0 == null) {
-                    //outermost voronoi edges aren't stored in the graph
-                    continue;
-                }
-
-                //find a corner on the exterior of the graph
-                //if this Edge e has one, then it must have two,
-                //finding these two corners will give us the missing
-                //triangle to render. this special triangle is handled
-                //outside this for loop
-                Corner cornerWithOneAdjacent = e.v0.border ? e.v0 : e.v1;
-                if (cornerWithOneAdjacent.border) {
-                    if (edgeCorner1 == null) {
-                        edgeCorner1 = cornerWithOneAdjacent;
-                    } else {
-                        edgeCorner2 = cornerWithOneAdjacent;
-                    }
-                }
-
-                drawTriangle(g, e.v0, e.v1, c);
-                c.area += (c.loc.x * (e.v0.loc.y - e.v1.loc.y) + e.v0.loc.x * (e.v1.loc.y - c.loc.y) + e.v1.loc.x * (c.loc.y - e.v0.loc.y)) / 2;
-            }
-
-            //handle the missing triangle
-            if (edgeCorner2 != null) {
-                //if these two outer corners are NOT on the same exterior edge of the graph,
-                //then we actually must render a polygon (w/ 4 points) and take into consideration
-                //one of the four corners (either 0,0 or 0,height or width,0 or width,height)
-                //note: the 'missing polygon' may have more than just 4 points. this
-                //is common when the number of sites are quite low (less than 5), but not a problem
-                //with a more useful number of sites. 
-                //TODO: find a way to fix this
-
-                if (closeEnough(edgeCorner1.loc.x, edgeCorner2.loc.x, 1)) {
-                    drawTriangle(g, edgeCorner1, edgeCorner2, c);
-                } else {
-                    int[] x = new int[4];
-                    int[] y = new int[4];
-                    x[0] = (int) c.loc.x;
-                    y[0] = (int) c.loc.y;
-                    x[1] = (int) edgeCorner1.loc.x;
-                    y[1] = (int) edgeCorner1.loc.y;
-
-                    //determine which corner this is
-                    x[2] = (int) ((closeEnough(edgeCorner1.loc.x, bounds.x, 1) || closeEnough(edgeCorner2.loc.x, bounds.x, .5)) ? bounds.x : bounds.right);
-                    y[2] = (int) ((closeEnough(edgeCorner1.loc.y, bounds.y, 1) || closeEnough(edgeCorner2.loc.y, bounds.y, .5)) ? bounds.y : bounds.bottom);
-
-                    x[3] = (int) edgeCorner2.loc.x;
-                    y[3] = (int) edgeCorner2.loc.y;
-
-                    g.fillPolygon(x, y, 4);
-                }
-            }
-        }
     }
 
     private void improveCorners() {
@@ -202,6 +133,7 @@ public abstract class VoronoiGraph {
         paint(g, true, true, false, false, false, true);
     }
 
+    //also records the area of each voronoi cell
     public void paint(Graphics2D g, boolean drawBiomes, boolean drawRivers, boolean drawSites, boolean drawCorners, boolean drawDelaunay, boolean drawVoronoi) {
         final int numSites = centers.size();
 
@@ -220,6 +152,7 @@ public abstract class VoronoiGraph {
             //only used if Center c is on the edge of the graph. allows for completely filling in the outer polygons
             Corner edgeCorner1 = null;
             Corner edgeCorner2 = null;
+            c.area = 0;
             for (Center n : c.neighbors) {
                 Edge e = edgeWithCenters(c, n);
 
@@ -243,6 +176,9 @@ public abstract class VoronoiGraph {
                 }
 
                 drawTriangle(g, e.v0, e.v1, c);
+                c.area += Math.abs(c.loc.x * (e.v0.loc.y - e.v1.loc.y)
+                        + e.v0.loc.x * (e.v1.loc.y - c.loc.y)
+                        + e.v1.loc.x * (c.loc.y - e.v0.loc.y)) / 2;
             }
 
             //handle the missing triangle
@@ -273,6 +209,7 @@ public abstract class VoronoiGraph {
                     y[3] = (int) edgeCorner2.loc.y;
 
                     g.fillPolygon(x, y, 4);
+                    c.area += 0; //TODO: area of polygon given vertices
                 }
             }
         }

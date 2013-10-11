@@ -1,7 +1,6 @@
 package test;
 
 import hoten.geom.Point;
-import hoten.voronoi.VoronoiGraph;
 import hoten.voronoi.nodename.as3delaunay.Voronoi;
 import java.awt.Color;
 import java.awt.Graphics;
