@@ -1,4 +1,4 @@
-package hoten.delaunay;
+package hoten.delaunay.examples;
 
 import hoten.delaunay.voronoi.Center;
 import hoten.delaunay.voronoi.VoronoiGraph;
@@ -28,8 +28,8 @@ public class TestGraphImpl extends VoronoiGraph {
         GRASSLAND(0x88aa55), SUBTROPICAL_DESERT(0xd2b98b), SHRUBLAND(0x889977),
         ICE(0x99ffff), MARSH(0x2f6666), TROPICAL_RAIN_FOREST(0x337755),
         TROPICAL_SEASONAL_FOREST(0x559944), COAST(0x33335a),
-        LAKESHORE(0x225588);
-        Color color;
+        LAKESHORE(0x225588), RIVER(0x225588);
+        public Color color;
 
         ColorData(int color) {
             this.color = new Color(color);
@@ -41,7 +41,7 @@ public class TestGraphImpl extends VoronoiGraph {
         OCEAN = ColorData.OCEAN.color;
         LAKE = ColorData.LAKE.color;
         BEACH = ColorData.BEACH.color;
-        RIVER = new Color(0x225588);
+        RIVER = ColorData.RIVER.color;
     }
 
     @Override
