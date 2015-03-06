@@ -14,14 +14,17 @@ import javax.swing.WindowConstants;
 public class TestDriver {
 
     public static void main(String[] args) throws IOException {
-        int bounds = 2000;
-        int numSites = 10000;
+        int bounds = 1000;
+        int numSites = 30000;
+        int numLloydRelxations = 2;
         long seed = System.nanoTime();
         System.out.println("seed: " + seed);
 
-        final BufferedImage img = createVoronoiGraph(bounds, numSites, 2, seed).createMap();
+        final BufferedImage img = createVoronoiGraph(bounds, numSites, numLloydRelxations, seed).createMap();
 
-        ImageIO.write(img, "PNG", new File(String.format("%s.png", seed)));
+        File file = new File(String.format("output/seed-%s-sites-%d-lloyds-%d.png", seed, numSites, numLloydRelxations));
+        file.mkdirs();
+        ImageIO.write(img, "PNG", file);
 
         final JFrame frame = new JFrame() {
             @Override
