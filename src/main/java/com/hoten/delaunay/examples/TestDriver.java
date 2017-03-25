@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -107,12 +108,20 @@ public class TestDriver {
 
     private static int oldX = -1, oldY = -1;
     private static int drawX = 0, drawY = 0;
+    private static int zoom = 1;
+    private static float zoomModifier = 1;
 
     private static void showGraph(final BufferedImage img) {
         final JFrame frame = new JFrame() {
             @Override
             public void paint(Graphics g) {
-                g.drawImage(img, getInsets().left + drawX, getInsets().top - drawY, null);
+                g.fillRect(0, 0, getWidth(), getHeight());
+                g.drawImage(img,
+                        getInsets().left + drawX,
+                        getInsets().top - drawY,
+                        (int)(GRAPH_BOUNDS * zoomModifier),
+                        (int)(GRAPH_BOUNDS * zoomModifier),
+                        null);
             }
         };
 
@@ -138,12 +147,20 @@ public class TestDriver {
             public void mouseDragged(MouseEvent e) {
                 if (oldX != -1) {
                     int dx = e.getX() - oldX, dy = e.getY() - oldY;
-                    drawX = Math.min(0, Math.max(FRAME_BOUNDS - GRAPH_BOUNDS, drawX + dx));
-                    drawY = Math.min(GRAPH_BOUNDS - FRAME_BOUNDS, Math.max(0, drawY - dy));
+                    drawX = Math.min(0, Math.max(FRAME_BOUNDS - (int)(GRAPH_BOUNDS * zoomModifier), drawX + dx));
+                    drawY = Math.min((int)(GRAPH_BOUNDS * zoomModifier) - FRAME_BOUNDS, Math.max(0, drawY - dy));
                     oldX += dx;
                     oldY += dy;
                     frame.repaint();
                 }
+            }
+        });
+        frame.addMouseWheelListener(new MouseAdapter() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                zoom = Math.min(10, Math.max(-5, zoom + e.getWheelRotation()));
+                zoomModifier = zoom > 0 ? zoom : 1/(float)(1 - zoom);
+                frame.repaint();
             }
         });
     }
