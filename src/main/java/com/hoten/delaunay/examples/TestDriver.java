@@ -2,16 +2,18 @@ package com.hoten.delaunay.examples;
 
 import com.hoten.delaunay.voronoi.VoronoiGraph;
 import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
-import java.awt.Graphics;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
 
 /**
  * <h3>How to use:</h3>
@@ -22,14 +24,19 @@ public class TestDriver {
     /** Do you really need to save image? */
     private static final boolean SAVE_FILE = false;
 
-    /** Image size (and frame size too for this example). */
-    private static final int BOUNDS = 1000;
+    /** The side of the square in which the graph will be fitted. */
+    private static final int GRAPH_BOUNDS = 1000;
+
+    /** Size of image which will be drawn. */
+    private static final int FRAME_BOUNDS = 512;
 
     /** Number of pieces for the graph. */
     private static final int SITES_AMOUNT = 30_000;
 
-    /** Each time a relaxation step is performed, the points are left in a slightly more even distribution:
-     * closely spaced points move farther apart, and widely spaced points move closer together. */
+    /**
+     * Each time a relaxation step is performed, the points are left in a slightly more even distribution:
+     * closely spaced points move farther apart, and widely spaced points move closer together.
+     */
     private static final int LLOYD_RELAXATIONS = 2;
 
     /** Randomizing number. Use it with {@link #RANDOM_SEED} = false to get same image every time. */
@@ -43,7 +50,7 @@ public class TestDriver {
 
         printInfo();
 
-        final BufferedImage img = createVoronoiGraph(BOUNDS, SITES_AMOUNT, LLOYD_RELAXATIONS, SEED).createMap();
+        final BufferedImage img = createVoronoiGraph(GRAPH_BOUNDS, SITES_AMOUNT, LLOYD_RELAXATIONS, SEED).createMap();
 
         saveFile(img);
 
@@ -52,7 +59,7 @@ public class TestDriver {
 
     private static void printInfo() {
         System.out.println("Seed: " + SEED);
-        System.out.println("Bounds: " + BOUNDS);
+        System.out.println("Bounds: " + GRAPH_BOUNDS);
         System.out.println("Sites: " + SITES_AMOUNT);
         System.out.println("Relaxs: " + LLOYD_RELAXATIONS);
         System.out.println("=============================");
@@ -98,18 +105,46 @@ public class TestDriver {
         return newName;
     }
 
+    private static int oldX = -1, oldY = -1;
+    private static int drawX = 0, drawY = 0;
+
     private static void showGraph(final BufferedImage img) {
         final JFrame frame = new JFrame() {
             @Override
             public void paint(Graphics g) {
-                g.drawImage(img, getInsets().left - 1, getInsets().top - 1, null);
+                g.drawImage(img, getInsets().left + drawX, getInsets().top - drawY, null);
             }
         };
 
-        frame.setTitle("Java fortune");
+        frame.setTitle("Java Fortune");
         frame.setVisible(true);
-        frame.setSize(img.getWidth() + frame.getInsets().left + frame.getInsets().right - 2,
-                img.getHeight() + frame.getInsets().top + frame.getInsets().bottom - 2);
+        frame.setSize(FRAME_BOUNDS, FRAME_BOUNDS);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        frame.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                oldX = e.getX();
+                oldY = e.getY();
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                oldX = -1;
+                oldY = -1;
+            }
+        });
+        frame.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (oldX != -1) {
+                    int dx = e.getX() - oldX, dy = e.getY() - oldY;
+                    drawX = Math.min(0, Math.max(FRAME_BOUNDS - GRAPH_BOUNDS, drawX + dx));
+                    drawY = Math.min(GRAPH_BOUNDS - FRAME_BOUNDS, Math.max(0, drawY - dy));
+                    oldX += dx;
+                    oldY += dy;
+                    frame.repaint();
+                }
+            }
+        });
     }
 }
