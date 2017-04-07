@@ -4,16 +4,10 @@ import com.hoten.delaunay.geom.Point;
 import com.hoten.delaunay.geom.Rectangle;
 import com.hoten.delaunay.voronoi.nodename.as3delaunay.LineSegment;
 import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 /**
  * VoronoiGraph.java
@@ -126,9 +120,10 @@ public abstract class VoronoiGraph {
     }
 
     public BufferedImage createMap() {
-        int size = (int) bounds.width;
+        int width = (int) bounds.width;
+        int height = (int) bounds.height;
 
-        final BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_4BYTE_ABGR);
+        final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g = img.createGraphics();
 
         paint(g);
