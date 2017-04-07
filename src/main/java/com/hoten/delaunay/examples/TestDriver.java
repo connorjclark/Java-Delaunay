@@ -80,8 +80,9 @@ public class TestDriver {
 
     private static void saveFile(BufferedImage img) throws IOException {
         if (SAVE_FILE) {
-            File file = new File(String.format("output/seed-%s-sites-%d-lloyds-%d.png", SEED, SITES_AMOUNT, LLOYD_RELAXATIONS));
+            File file = new File("output/");
             file.mkdirs();
+            file = new File(String.format("output/seed-%s-sites-%d-lloyds-%d.png", SEED, SITES_AMOUNT, LLOYD_RELAXATIONS));
             while (file.exists()) file = new File(incrementFileName(file.getPath()));
             ImageIO.write(img, "PNG", file);
         }
