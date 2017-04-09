@@ -2,6 +2,7 @@ package com.hoten.delaunay.examples;
 
 import com.hoten.delaunay.voronoi.Center;
 import com.hoten.delaunay.voronoi.VoronoiGraph;
+import com.hoten.delaunay.voronoi.groundshapes.HeightAlgorithm;
 import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
 import java.awt.Color;
 import java.util.Random;
@@ -36,8 +37,8 @@ public class TestGraphImpl extends VoronoiGraph {
         }
     }
 
-    public TestGraphImpl(Voronoi v, int numLloydRelaxations, Random r) {
-        super(v, numLloydRelaxations, r);
+    public TestGraphImpl(Voronoi v, int numLloydRelaxations, Random r, HeightAlgorithm algorithm) {
+        super(v, numLloydRelaxations, r, algorithm);
         OCEAN = ColorData.OCEAN.color;
         LAKE = ColorData.LAKE.color;
         BEACH = ColorData.BEACH.color;

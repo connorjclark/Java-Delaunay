@@ -2,18 +2,12 @@ package com.hoten.delaunay.voronoi;
 
 import com.hoten.delaunay.geom.Point;
 import com.hoten.delaunay.geom.Rectangle;
-import com.hoten.delaunay.voronoi.nodename.as3delaunay.LineSegment;
-import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import com.hoten.delaunay.voronoi.groundshapes.HeightAlgorithm;
+import com.hoten.delaunay.voronoi.nodename.as3delaunay.*;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 /**
  * VoronoiGraph.java
@@ -30,12 +24,8 @@ public abstract class VoronoiGraph {
     protected Color OCEAN, RIVER, LAKE, BEACH;
     final public BufferedImage pixelCenterMap;
 
-    public VoronoiGraph(Voronoi v, int numLloydRelaxations, Random r) {
+    public VoronoiGraph(Voronoi v, int numLloydRelaxations, Random r, HeightAlgorithm algorithm) {
         this.r = r;
-        bumps = r.nextInt(5) + 1;
-        startAngle = r.nextDouble() * 2 * Math.PI;
-        dipAngle = r.nextDouble() * 2 * Math.PI;
-        dipWidth = r.nextDouble() * .5 + .2;
         bounds = v.get_plotBounds();
         for (int i = 0; i < numLloydRelaxations; i++) {
             ArrayList<Point> points = v.siteCoords();
@@ -57,7 +47,7 @@ public abstract class VoronoiGraph {
         buildGraph(v);
         improveCorners();
 
-        assignCornerElevations();
+        assignCornerElevations(algorithm);
         assignOceanCoastAndLand();
         redistributeElevations(landCorners());
         assignPolygonElevations();
@@ -370,10 +360,10 @@ public abstract class VoronoiGraph {
         return c;
     }
 
-    private void assignCornerElevations() {
+    private void assignCornerElevations(HeightAlgorithm algorithm) {
         LinkedList<Corner> queue = new LinkedList();
         for (Corner c : corners) {
-            c.water = isWater(c.loc);
+            c.water = algorithm.isWater(c.loc, bounds, r);
             if (c.border) {
                 c.elevation = 0;
                 queue.add(c);
@@ -395,44 +385,6 @@ public abstract class VoronoiGraph {
                 }
             }
         }
-    }
-    double[][] noise;
-    double ISLAND_FACTOR = 1.07;  // 1.0 means no small islands; 2.0 leads to a lot
-    final int bumps;
-    final double startAngle;
-    final double dipAngle;
-    final double dipWidth;
-
-    //only the radial implementation of amitp's map generation
-    //TODO implement more island shapes
-    private boolean isWater(Point p) {
-        p = new Point(2 * (p.x / bounds.width - 0.5), 2 * (p.y / bounds.height - 0.5));
-
-        double angle = Math.atan2(p.y, p.x);
-        double length = 0.5 * (Math.max(Math.abs(p.x), Math.abs(p.y)) + p.length());
-
-        double r1 = 0.5 + 0.40 * Math.sin(startAngle + bumps * angle + Math.cos((bumps + 3) * angle));
-        double r2 = 0.7 - 0.20 * Math.sin(startAngle + bumps * angle - Math.sin((bumps + 2) * angle));
-        if (Math.abs(angle - dipAngle) < dipWidth
-                || Math.abs(angle - dipAngle + 2 * Math.PI) < dipWidth
-                || Math.abs(angle - dipAngle - 2 * Math.PI) < dipWidth) {
-            r1 = r2 = 0.2;
-        }
-        return !(length < r1 || (length > r1 * ISLAND_FACTOR && length < r2));
-
-        //return false;
-
-        /*if (noise == null) {
-         noise = new Perlin2d(.125, 8, MyRandom.seed).createArray(257, 257);
-         }
-         int x = (int) ((p.x + 1) * 128);
-         int y = (int) ((p.y + 1) * 128);
-         return noise[x][y] < .3 + .3 * p.l2();*/
-
-        /*boolean eye1 = new Point(p.x - 0.2, p.y / 2 + 0.2).length() < 0.05;
-         boolean eye2 = new Point(p.x + 0.2, p.y / 2 + 0.2).length() < 0.05;
-         boolean body = p.length() < 0.8 - 0.18 * Math.sin(5 * Math.atan2(p.y, p.x));
-         return !(body && !eye1 && !eye2);*/
     }
 
     private void assignOceanCoastAndLand() {
