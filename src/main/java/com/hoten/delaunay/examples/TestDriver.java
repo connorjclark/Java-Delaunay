@@ -1,8 +1,7 @@
 package com.hoten.delaunay.examples;
 
 import com.hoten.delaunay.voronoi.VoronoiGraph;
-import com.hoten.delaunay.voronoi.groundshapes.HeightAlgorithm;
-import com.hoten.delaunay.voronoi.groundshapes.Radial;
+import com.hoten.delaunay.voronoi.groundshapes.*;
 import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
 
 import javax.imageio.ImageIO;
@@ -49,8 +48,8 @@ public class TestDriver {
     /** You can make it false if you want to check some changes in code or image/graph size. */
     private static final boolean RANDOM_SEED = true;
 
-    /** Random, radial, etc. See {@link #getAlgorithmImplementation(Random, String)} */
-    private static final String ALGORITHM = "radial";
+    /** Random, radial, blob, etc. See {@link #getAlgorithmImplementation(Random, String)} */
+    private static final String ALGORITHM = "perlin";
 
     public static void main(String[] args) throws IOException {
         if (RANDOM_SEED) SEED = System.nanoTime();
@@ -91,6 +90,8 @@ public class TestDriver {
      * <ol start = "0">
      *     <li>random</li>
      *     <li>radial</li>
+     *     <li>blob</li>
+     *     <li>perlin</li>
      * </ol>
      *
      * @param r Randomizer.
@@ -101,6 +102,8 @@ public class TestDriver {
         HashMap<String, Integer> implementations = new HashMap<>();
         implementations.put("random", 0);
         implementations.put("radial", 1);
+        implementations.put("blob", 2);
+        implementations.put("perlin", 3);
         int i = implementations.getOrDefault(name, 0);
         if (i == 0) i = 1 + r.nextInt(implementations.size() - 1);
         switch (i) {
@@ -109,6 +112,8 @@ public class TestDriver {
                     r.nextDouble() * 2 * Math.PI,
                     r.nextDouble() * 2 * Math.PI,
                     r.nextDouble() * .5 + .2);
+            case 2: return new Blob();
+            case 3: return new Perlin(r, 7, 256, 256);
             default: throw new RuntimeException("Method \"getAlgorithmImplementation()\" is broken. " +
                     "Check implementations map and switch statement. Their values and cases must match.");
         }

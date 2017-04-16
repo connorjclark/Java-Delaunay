@@ -3,7 +3,8 @@ package com.hoten.delaunay.voronoi;
 import com.hoten.delaunay.geom.Point;
 import com.hoten.delaunay.geom.Rectangle;
 import com.hoten.delaunay.voronoi.groundshapes.HeightAlgorithm;
-import com.hoten.delaunay.voronoi.nodename.as3delaunay.*;
+import com.hoten.delaunay.voronoi.nodename.as3delaunay.LineSegment;
+import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
