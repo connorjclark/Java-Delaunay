@@ -3,7 +3,6 @@
  * translation of a wonderful map generating algorthim by Amit Patel of Red Blob Games,
  * which can be found here (http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/)
  * Hopefully it's of use to someone out there who needed it in Java like I did!
- * Note, the only island mode implemented is Radial. Implementing more is something for another day.
  * 
  * FORTUNE'S ALGORTIHIM
  * 

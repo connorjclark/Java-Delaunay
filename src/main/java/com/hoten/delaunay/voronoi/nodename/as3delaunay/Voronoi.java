@@ -27,8 +27,10 @@ package com.hoten.delaunay.voronoi.nodename.as3delaunay;
  * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY
  * OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
  */
+
 import com.hoten.delaunay.geom.Point;
 import com.hoten.delaunay.geom.Rectangle;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,6 +81,7 @@ public final class Voronoi {
         fortunesAlgorithm();
     }
 
+    //TODO check points for negative values. We must search min value too and translate whole list to fit it in positive quadrant.
     public Voronoi(ArrayList<Point> points, ArrayList<Color> colors) {
         double maxWidth = 0, maxHeight = 0;
         for (Point p : points) {

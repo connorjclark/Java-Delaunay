@@ -1,6 +1,7 @@
 package com.hoten.delaunay.examples;
 
 import com.hoten.delaunay.voronoi.VoronoiGraph;
+import com.hoten.delaunay.voronoi.groundshapes.*;
 import com.hoten.delaunay.voronoi.nodename.as3delaunay.Voronoi;
 
 import javax.imageio.ImageIO;
@@ -12,6 +13,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,13 +28,13 @@ public class TestDriver {
     private static final boolean SAVE_FILE = false;
 
     /** The side of the square in which the graph will be fitted. */
-    private static final int GRAPH_BOUNDS = 1000;
+    private static final int GRAPH_BOUNDS = 2048;
 
     /** Size of image which will be drawn. */
     private static final int FRAME_BOUNDS = 512;
 
     /** Number of pieces for the graph. */
-    private static final int SITES_AMOUNT = 30_000;
+    private static final int SITES_AMOUNT = 8_000;
 
     /**
      * Each time a relaxation step is performed, the points are left in a slightly more even distribution:
@@ -46,12 +48,15 @@ public class TestDriver {
     /** You can make it false if you want to check some changes in code or image/graph size. */
     private static final boolean RANDOM_SEED = true;
 
+    /** Random, radial, blob, etc. See {@link #getAlgorithmImplementation(Random, String)} */
+    private static final String ALGORITHM = "perlin";
+
     public static void main(String[] args) throws IOException {
         if (RANDOM_SEED) SEED = System.nanoTime();
 
         printInfo();
 
-        final BufferedImage img = createVoronoiGraph(GRAPH_BOUNDS, SITES_AMOUNT, LLOYD_RELAXATIONS, SEED).createMap();
+        final BufferedImage img = createVoronoiGraph(GRAPH_BOUNDS, SITES_AMOUNT, LLOYD_RELAXATIONS, SEED, ALGORITHM).createMap();
 
         saveFile(img);
 
@@ -62,20 +67,56 @@ public class TestDriver {
         System.out.println("Seed: " + SEED);
         System.out.println("Bounds: " + GRAPH_BOUNDS);
         System.out.println("Sites: " + SITES_AMOUNT);
+        System.out.println("Shape: " + ALGORITHM);
         System.out.println("Relaxs: " + LLOYD_RELAXATIONS);
         System.out.println("=============================");
     }
 
-    public static VoronoiGraph createVoronoiGraph(int bounds, int numSites, int numLloydRelaxations, long seed) {
+    public static VoronoiGraph createVoronoiGraph(int bounds, int numSites, int numLloydRelaxations, long seed, String algorithmName) {
         final Random r = new Random(seed);
+        HeightAlgorithm algorithm = getAlgorithmImplementation(r, algorithmName);
 
         //make the intial underlying voronoi structure
         final Voronoi v = new Voronoi(numSites, bounds, bounds, r, null);
 
         //assemble the voronoi strucutre into a usable graph object representing a map
-        final TestGraphImpl graph = new TestGraphImpl(v, numLloydRelaxations, r);
+        final TestGraphImpl graph = new TestGraphImpl(v, numLloydRelaxations, r, algorithm);
 
         return graph;
+    }
+
+    /**
+     * Currently there are only 1 algorithm. You can choose one of algorithms exactly or random from this list:
+     * <ol start = "0">
+     *     <li>random</li>
+     *     <li>radial</li>
+     *     <li>blob</li>
+     *     <li>perlin</li>
+     * </ol>
+     *
+     * @param r Randomizer.
+     * @param name Name of the algorithm.
+     * @return
+     */
+    private static HeightAlgorithm getAlgorithmImplementation(Random r, String name) {
+        HashMap<String, Integer> implementations = new HashMap<>();
+        implementations.put("random", 0);
+        implementations.put("radial", 1);
+        implementations.put("blob", 2);
+        implementations.put("perlin", 3);
+        int i = implementations.getOrDefault(name, 0);
+        if (i == 0) i = 1 + r.nextInt(implementations.size() - 1);
+        switch (i) {
+            case 1: return new Radial(1.07,
+                    r.nextInt(5) + 1,
+                    r.nextDouble() * 2 * Math.PI,
+                    r.nextDouble() * 2 * Math.PI,
+                    r.nextDouble() * .5 + .2);
+            case 2: return new Blob();
+            case 3: return new Perlin(r, 7, 256, 256);
+            default: throw new RuntimeException("Method \"getAlgorithmImplementation()\" is broken. " +
+                    "Check implementations map and switch statement. Their values and cases must match.");
+        }
     }
 
     private static void saveFile(BufferedImage img) throws IOException {
